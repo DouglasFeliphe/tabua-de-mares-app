@@ -8,6 +8,9 @@ import 'react-native-gesture-handler';
 
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import Navigation from './navigation';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+
+const queryClient = new QueryClient();
 
 export default function App() {
   const colorScheme = useColorScheme();
@@ -15,9 +18,11 @@ export default function App() {
 
   return (
     <>
-      <SafeAreaProvider>
-        <Navigation theme={theme} />;
-      </SafeAreaProvider>
+      <QueryClientProvider client={queryClient}>
+        <SafeAreaProvider>
+          <Navigation theme={theme} />;
+        </SafeAreaProvider>
+      </QueryClientProvider>
     </>
   );
 }
