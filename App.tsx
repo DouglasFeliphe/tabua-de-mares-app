@@ -30,23 +30,6 @@ export default function App() {
       setLocation(location);
     }
 
-    getCurrentLocation();
-  }, []);
-
-  let text = 'Waiting...';
-
-  if (errorMsg) {
-    text = errorMsg;
-  } else if (location) {
-    text = JSON.stringify(location);
-  }
-
-  return (
-    <View>
-      <Text>{text}</Text>
-      <Text>{location?.coords.latitude}</Text>
-      <Text>{location?.coords.longitude}</Text>
-    </View>
-  );
-  // return <Navigation theme={theme} />;
+if (__DEV__) {
+  require('./ReactotronConfig');
 }
