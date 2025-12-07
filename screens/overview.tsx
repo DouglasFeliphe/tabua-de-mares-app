@@ -1,13 +1,16 @@
 import { useNavigation } from '@react-navigation/native';
-import { ScreenContent } from 'components/ScreenContent';
 
-import { StyleSheet, View, Text } from 'react-native';
+import { Dimensions, StyleSheet } from 'react-native';
 
-import { Button } from '../components/Button';
 import { useLocation } from 'hooks/useLocation';
 import { useEffect, useState } from 'react';
 import MapView, { Marker } from 'react-native-maps';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { getTabuaMareByGeolocation } from 'services/getTabuaMareByGeolocation.service';
+import { Button } from '../components/Button';
+
+const windowHeight = Dimensions.get('window').height;
+// const windowWidth = Dimensions.get('window').width;
 
 export default function Overview() {
   const navigation = useNavigation();
@@ -36,7 +39,12 @@ export default function Overview() {
     }
   }, [location, state]);
 
+  const insets = useSafeAreaInsets();
+
   return (
+    <SafeAreaView
+      edges={['top', 'bottom']}
+      style={[styles.container, { paddingBottom: insets.bottom }]}>
       <MapView
         initialRegion={{
           latitude: location ? location.coords.latitude : -15.7826,
@@ -54,7 +62,10 @@ export default function Overview() {
           description="A cool place"
         />
       </MapView>
+      {/* </ScreenContent> */}
       <Button
+        isLoading={isLoading}
+        className="mt-4"
         onPress={() =>
           navigation.navigate('Details', {
             name: 'Dan',
@@ -62,13 +73,22 @@ export default function Overview() {
         }
         title="Show Details"
       />
-    </View>
+    </SafeAreaView>
   );
 }
 
 export const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 24,
+    height: windowHeight,
+    // paddingBottom: insets.bottom,
+    // padding: 24,
+    // borderWidth: 2,
+  },
+
+  map: {
+    flex: 1,
+    width: '100%',
+    height: '100%',
   },
 });
