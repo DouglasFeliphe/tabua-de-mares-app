@@ -1,10 +1,8 @@
 import './global.css';
 
-import { DefaultTheme, DarkTheme } from '@react-navigation/native';
-import { useColorScheme, View, Text } from 'react-native';
-import { useEffect, useMemo, useState } from 'react';
-
-import * as Location from 'expo-location';
+import { DarkTheme, DefaultTheme } from '@react-navigation/native';
+import { useMemo } from 'react';
+import { useColorScheme } from 'react-native';
 
 import 'react-native-gesture-handler';
 
@@ -14,21 +12,8 @@ export default function App() {
   const colorScheme = useColorScheme();
   const theme = useMemo(() => (colorScheme === 'dark' ? DarkTheme : DefaultTheme), [colorScheme]);
 
-  const [location, setLocation] = useState<Location.LocationObject | null>(null);
-  console.log('location :', location);
-  const [errorMsg, setErrorMsg] = useState<string | null>(null);
-
-  useEffect(() => {
-    async function getCurrentLocation() {
-      let { status } = await Location.requestForegroundPermissionsAsync();
-      if (status !== 'granted') {
-        setErrorMsg('Permission to access location was denied');
-        return;
-      }
-
-      let location = await Location.getCurrentPositionAsync({});
-      setLocation(location);
-    }
+  return <Navigation theme={theme} />;
+}
 
 if (__DEV__) {
   require('./ReactotronConfig');
