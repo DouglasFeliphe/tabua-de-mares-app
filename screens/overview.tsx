@@ -1,21 +1,46 @@
 import { useNavigation } from '@react-navigation/native';
 import { ScreenContent } from 'components/ScreenContent';
 
-import { StyleSheet, View } from 'react-native';
+import { StyleSheet, View, Text } from 'react-native';
 
 import { Button } from '../components/Button';
 import { useLocation } from 'hooks/useLocation';
+import { useEffect, useState } from 'react';
+import { getTabuaMareByGeolocation } from 'services/getTabuaMareByGeolocation.service';
 
 export default function Overview() {
   const navigation = useNavigation();
+
   const { location } = useLocation();
+
+  const [tabuaMareData, setTabuaMareData] = useState();
+  console.log('tabuaMareData :', tabuaMareData);
+  const [isLoading, setIsLoading] = useState(false);
+
+  const fetchTabuaMareData = async (lat: number, lng: number) => {
+    setIsLoading(true);
+    try {
+      const data = await getTabuaMareByGeolocation(lat, lng);
+      setTabuaMareData(data);
+    } catch (error) {
+      console.error('Error fetching Tabua Mare data:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (location) {
+      fetchTabuaMareData(location.coords.latitude, location.coords.longitude);
+    }
+  }, [location]);
 
   return (
     <View style={styles.container}>
       <ScreenContent path="screens/overview.tsx" title="Overview">
         <Text>{JSON.stringify(location?.coords.latitude)}</Text>
         <Text>{JSON.stringify(location?.coords.longitude)}</Text>
-</ScreenContent>
+      </ScreenContent>
       <Button
         onPress={() =>
           navigation.navigate('Details', {
