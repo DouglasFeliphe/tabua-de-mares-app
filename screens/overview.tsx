@@ -6,21 +6,22 @@ import { StyleSheet, View, Text } from 'react-native';
 import { Button } from '../components/Button';
 import { useLocation } from 'hooks/useLocation';
 import { useEffect, useState } from 'react';
+import MapView, { Marker } from 'react-native-maps';
 import { getTabuaMareByGeolocation } from 'services/getTabuaMareByGeolocation.service';
 
 export default function Overview() {
   const navigation = useNavigation();
 
-  const { location } = useLocation();
+  const { location, state } = useLocation();
 
   const [tabuaMareData, setTabuaMareData] = useState();
   console.log('tabuaMareData :', tabuaMareData);
   const [isLoading, setIsLoading] = useState(false);
 
-  const fetchTabuaMareData = async (lat: number, lng: number) => {
+  const fetchTabuaMareData = async (lat: number, lng: number, state: string) => {
     setIsLoading(true);
     try {
-      const data = await getTabuaMareByGeolocation(lat, lng);
+      const data = await getTabuaMareByGeolocation(lat, lng, state);
       setTabuaMareData(data);
     } catch (error) {
       console.error('Error fetching Tabua Mare data:', error);
@@ -30,10 +31,10 @@ export default function Overview() {
   };
 
   useEffect(() => {
-    if (location) {
-      fetchTabuaMareData(location.coords.latitude, location.coords.longitude);
+    if (location && state) {
+      fetchTabuaMareData(location.coords.latitude, location.coords.longitude, state ?? '');
     }
-  }, [location]);
+  }, [location, state]);
 
   return (
       <MapView
