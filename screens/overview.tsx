@@ -36,11 +36,23 @@ export default function Overview() {
   }, [location]);
 
   return (
-    <View style={styles.container}>
-      <ScreenContent path="screens/overview.tsx" title="Overview">
-        <Text>{JSON.stringify(location?.coords.latitude)}</Text>
-        <Text>{JSON.stringify(location?.coords.longitude)}</Text>
-      </ScreenContent>
+      <MapView
+        initialRegion={{
+          latitude: location ? location.coords.latitude : -15.7826,
+          longitude: location ? location.coords.longitude : -47.9354,
+          latitudeDelta: 0.0922,
+          longitudeDelta: 0.0421,
+        }}
+        style={styles.map}>
+        <Marker
+          coordinate={{
+            latitude: location?.coords.latitude ?? -15.7826,
+            longitude: location?.coords.longitude ?? -47.9354,
+          }}
+          title="My Location"
+          description="A cool place"
+        />
+      </MapView>
       <Button
         onPress={() =>
           navigation.navigate('Details', {
