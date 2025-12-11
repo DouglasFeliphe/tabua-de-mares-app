@@ -1,13 +1,14 @@
 import { useNavigation } from '@react-navigation/native';
 
-import { Dimensions, StyleSheet } from 'react-native';
+import { Alert, Dimensions, StyleSheet, Text, View, Animated } from 'react-native';
 
 import { useLocation } from 'hooks/useLocation';
 import { useEffect, useState } from 'react';
-import MapView, { Marker } from 'react-native-maps';
+import MapView, { MapPressEvent, Marker } from 'react-native-maps';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
-import { getTabuaMareByGeolocation } from 'services/getTabuaMareByGeolocation.service';
 import { Button } from '../components/Button';
+import { EvilIcons } from '@expo/vector-icons';
+import { useGetMaregrafosQuery } from 'queries/useGetMaregrafos';
 
 const windowHeight = Dimensions.get('window').height;
 // const windowWidth = Dimensions.get('window').width;
@@ -17,46 +18,76 @@ export default function Overview() {
 
   const { location, state } = useLocation();
 
-  const [tabuaMareData, setTabuaMareData] = useState();
-  console.log('tabuaMareData :', tabuaMareData);
-  const [isLoading, setIsLoading] = useState(false);
+  const [region, setRegion] = useState({
+    latitude: location ? location.coords.latitude : -15.7826,
+    longitude: location ? location.coords.longitude : -47.9354,
+    latitudeDelta: 35,
+    longitudeDelta: 35,
+  });
 
-  const fetchTabuaMareData = async (lat: number, lng: number, state: string) => {
-    setIsLoading(true);
-    try {
-      const data = await getTabuaMareByGeolocation(lat, lng, state);
-      setTabuaMareData(data);
-    } catch (error) {
-      console.error('Error fetching Tabua Mare data:', error);
-    } finally {
-      setIsLoading(false);
-    }
+  const { data: maregrafosData, isLoading, isError } = useGetMaregrafosQuery({});
+
+  console.log('maregrafosData :', maregrafosData);
+
+  const handleMapPress = (event: MapPressEvent) => {
+    const { latitude, longitude } = event.nativeEvent.coordinate;
+
+    setRegion((prevRegion) => ({
+      ...prevRegion,
+      latitude,
+      longitude,
+    }));
   };
 
   useEffect(() => {
-    if (location && state) {
-      fetchTabuaMareData(location.coords.latitude, location.coords.longitude, state ?? '');
+    if (isError) {
+      Alert.alert('Erro', 'Não foi possível carregar maré, tente mais tarde.');
     }
-  }, [location, state]);
+  }, [isError]);
 
   const insets = useSafeAreaInsets();
+
+  if (isLoading) {
+    return (
+      <SafeAreaView>
+        <View className="mt-10 flex-1 items-center justify-center space-x-8 text-center">
+          <Text>Carregando dados de tábua de marés para o estado {state}...</Text>
+          <EvilIcons name="spinner" size={24} color="black" />
+        </View>
+      </SafeAreaView>
+    );
+  }
 
   return (
     <SafeAreaView
       edges={['top', 'bottom']}
       style={[styles.container, { paddingBottom: insets.bottom }]}>
       <MapView
+        style={styles.map}
         initialRegion={{
-          latitude: location ? location.coords.latitude : -15.7826,
-          longitude: location ? location.coords.longitude : -47.9354,
-          latitudeDelta: 0.0922,
-          longitudeDelta: 0.0421,
+          latitude: -15.7826,
+          longitude: -47.9354,
+          latitudeDelta: 10,
+          longitudeDelta: 10,
         }}
-        style={styles.map}>
+        region={region}
+        onPress={handleMapPress}>
+        {maregrafosData?.map((maregrafo) => (
+          <Marker
+            key={maregrafo.siglaMaregrafo}
+            coordinate={{
+              latitude: maregrafo.lat,
+              longitude: maregrafo.lon,
+            }}
+            pinColor="#38e0fa"
+            title={maregrafo.nomeMaregrafo}
+            description={maregrafo.local}
+          />
+        ))}
         <Marker
           coordinate={{
-            latitude: location?.coords.latitude ?? -15.7826,
-            longitude: location?.coords.longitude ?? -47.9354,
+            latitude: region.latitude,
+            longitude: region.longitude,
           }}
           title="My Location"
           description="A cool place"
