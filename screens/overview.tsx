@@ -1,14 +1,16 @@
 import { useNavigation } from '@react-navigation/native';
 
-import { Alert, Dimensions, StyleSheet, Text, View, Animated } from 'react-native';
+import { ActivityIndicator, Alert, Dimensions, StyleSheet, Text, View } from 'react-native';
 
 import { useLocation } from 'hooks/useLocation';
-import { useEffect, useState } from 'react';
+import { useGetMaregrafosQuery } from 'queries/useGetMaregrafos';
+import React, { useEffect, useMemo, useState } from 'react';
 import MapView, { MapPressEvent, Marker } from 'react-native-maps';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
-import { Button } from '../components/Button';
-import { EvilIcons } from '@expo/vector-icons';
-import { useGetMaregrafosQuery } from 'queries/useGetMaregrafos';
+import { BottomSheetRef } from '@ahmetaltai/react-native-bottom-sheet';
+import { BottomSheetComponent } from 'components/BottomSheet';
+import { SelectDropdown } from 'components/SelectDropdown';
+import colors from 'tailwindcss/colors';
 
 const windowHeight = Dimensions.get('window').height;
 // const windowWidth = Dimensions.get('window').width;
@@ -16,7 +18,15 @@ const windowHeight = Dimensions.get('window').height;
 export default function Overview() {
   const navigation = useNavigation();
 
+  const insets = useSafeAreaInsets();
+
   const { location, state } = useLocation();
+
+  const BottomSheetRef = React.useRef<BottomSheetRef>({} as BottomSheetRef);
+
+  const openBottomSheet = () => {
+    BottomSheetRef.current?.open();
+  };
 
   const [region, setRegion] = useState({
     latitude: location ? location.coords.latitude : -15.7826,
@@ -27,9 +37,9 @@ export default function Overview() {
 
   const { data: maregrafosData, isLoading, isError } = useGetMaregrafosQuery({});
 
-  console.log('maregrafosData :', maregrafosData);
+  console.log('maregrafosData :', JSON.stringify(maregrafosData, null, 2));
 
-  const handleMapPress = (event: MapPressEvent) => {
+  function handlePressMap(event: MapPressEvent) {
     const { latitude, longitude } = event.nativeEvent.coordinate;
 
     setRegion((prevRegion) => ({
@@ -37,7 +47,23 @@ export default function Overview() {
       latitude,
       longitude,
     }));
-  };
+  }
+
+  function handlePressMarker() {
+    openBottomSheet();
+  }
+
+  function handleSelectMaregrafo(nomeMaregrafo: string) {
+    const maregrafo = maregrafosData?.find((m) => m.nomeMaregrafo === nomeMaregrafo);
+
+    if (maregrafo) {
+      setRegion((prevRegion) => ({
+        ...prevRegion,
+        latitude: maregrafo.lat,
+        longitude: maregrafo.lon,
+      }));
+    }
+  }
 
   useEffect(() => {
     if (isError) {
@@ -45,66 +71,72 @@ export default function Overview() {
     }
   }, [isError]);
 
-  const insets = useSafeAreaInsets();
+  const mappedData = useMemo(() => {
+    return (
+      maregrafosData?.map((maregrafo) => ({
+        key: maregrafo.siglaMaregrafo,
+        value: maregrafo.nomeMaregrafo,
+      })) ?? []
+    );
+  }, [maregrafosData]);
 
   if (isLoading) {
     return (
       <SafeAreaView>
         <View className="mt-10 flex-1 items-center justify-center space-x-8 text-center">
           <Text>Carregando dados de tábua de marés para o estado {state}...</Text>
-          <EvilIcons name="spinner" size={24} color="black" />
+          <ActivityIndicator size="large" color={colors.indigo[500]} />
         </View>
       </SafeAreaView>
     );
   }
 
   return (
-    <SafeAreaView
-      edges={['top', 'bottom']}
-      style={[styles.container, { paddingBottom: insets.bottom }]}>
-      <MapView
-        style={styles.map}
-        initialRegion={{
-          latitude: -15.7826,
-          longitude: -47.9354,
-          latitudeDelta: 10,
-          longitudeDelta: 10,
-        }}
-        region={region}
-        onPress={handleMapPress}>
-        {maregrafosData?.map((maregrafo) => (
-          <Marker
-            key={maregrafo.siglaMaregrafo}
-            coordinate={{
-              latitude: maregrafo.lat,
-              longitude: maregrafo.lon,
-            }}
-            pinColor="#38e0fa"
-            title={maregrafo.nomeMaregrafo}
-            description={maregrafo.local}
-          />
-        ))}
-        <Marker
-          coordinate={{
-            latitude: region.latitude,
-            longitude: region.longitude,
-          }}
-          title="My Location"
-          description="A cool place"
+    <>
+      <SafeAreaView
+        edges={['top', 'bottom']}
+        style={[styles.container, { paddingBottom: insets.bottom, paddingTop: insets.top }]}>
+        <SelectDropdown
+          data={mappedData}
+          searchPlaceholder="Buscar..."
+          placeholder="Selecione um porto"
+          setSelected={handleSelectMaregrafo}
         />
-      </MapView>
-      {/* </ScreenContent> */}
-      <Button
-        isLoading={isLoading}
-        className="mt-4"
-        onPress={() =>
-          navigation.navigate('Details', {
-            name: 'Dan',
-          })
-        }
-        title="Show Details"
-      />
-    </SafeAreaView>
+        <MapView
+          style={styles.map}
+          initialRegion={{
+            latitude: -15.7826,
+            longitude: -47.9354,
+            latitudeDelta: 10,
+            longitudeDelta: 10,
+          }}
+          region={region}
+          onPress={handlePressMap}>
+          {maregrafosData?.map((maregrafo) => (
+            <Marker
+              key={maregrafo.siglaMaregrafo}
+              coordinate={{
+                latitude: maregrafo.lat,
+                longitude: maregrafo.lon,
+              }}
+              pinColor={colors.indigo[500]}
+              // title={maregrafo.nomeMaregrafo}
+              // description={maregrafo.local}
+              onPress={handlePressMarker}
+            />
+          ))}
+          <Marker
+            coordinate={{
+              latitude: region.latitude,
+              longitude: region.longitude,
+            }}
+            title="Você está aqui"
+            // description="A cool place"
+          />
+        </MapView>
+        <BottomSheetComponent ref={BottomSheetRef} />
+      </SafeAreaView>
+    </>
   );
 }
 
@@ -112,14 +144,23 @@ export const styles = StyleSheet.create({
   container: {
     flex: 1,
     height: windowHeight,
+    gap: 12,
+
+    // alignItems: 'center',
+    // justifyContent: 'center',
     // paddingBottom: insets.bottom,
     // padding: 24,
     // borderWidth: 2,
   },
 
   map: {
-    flex: 1,
-    width: '100%',
-    height: '100%',
+    // flex: 1,
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    // width: '100%',
+    // height: '100%',
   },
 });
