@@ -8,11 +8,15 @@ const Stack = createStackNavigator({
   screens: {
     Overview: {
       screen: Overview,
+      options: ({ navigation }) => ({
+        header: () => null,
+      }),
     },
     Details: {
       screen: Details,
       options: ({ navigation }) => ({
-        headerLeft: () => <BackButton onPress={navigation.goBack} />,
+        // headerLeft: () => <BackButton onPress={navigation.goBack} />,
+        header: () => null,
       }),
     },
   },
