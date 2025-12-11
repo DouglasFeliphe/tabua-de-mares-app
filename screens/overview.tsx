@@ -3,7 +3,7 @@ import { useNavigation } from '@react-navigation/native';
 import { ActivityIndicator, Alert, Dimensions, StyleSheet, Text, View } from 'react-native';
 
 import { useLocation } from 'hooks/useLocation';
-import { useGetMaregrafosQuery } from 'queries/useGetMaregrafos';
+import { useGetMareGrafosQuery } from 'queries/useGetMaregrafos';
 import React, { useEffect, useMemo, useState } from 'react';
 import MapView, { MapPressEvent, Marker } from 'react-native-maps';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -13,7 +13,7 @@ import { SelectDropdown } from 'components/SelectDropdown';
 import colors from 'tailwindcss/colors';
 
 const windowHeight = Dimensions.get('window').height;
-// const windowWidth = Dimensions.get('window').width;
+const windowWidth = Dimensions.get('window').width;
 
 export default function Overview() {
   const navigation = useNavigation();
@@ -35,9 +35,9 @@ export default function Overview() {
     longitudeDelta: 35,
   });
 
-  const { data: maregrafosData, isLoading, isError } = useGetMaregrafosQuery({});
+  const { data: mareGrafosData, isLoading, isError } = useGetMareGrafosQuery({});
 
-  console.log('maregrafosData :', JSON.stringify(maregrafosData, null, 2));
+  console.log('maregrafosData :', JSON.stringify(mareGrafosData, null, 2));
 
   function handlePressMap(event: MapPressEvent) {
     const { latitude, longitude } = event.nativeEvent.coordinate;
@@ -53,14 +53,14 @@ export default function Overview() {
     openBottomSheet();
   }
 
-  function handleSelectMaregrafo(nomeMaregrafo: string) {
-    const maregrafo = maregrafosData?.find((m) => m.nomeMaregrafo === nomeMaregrafo);
+  function handleSelectMareGrafo(nomeMareGrafo: string) {
+    const mareGrafo = mareGrafosData?.find((m) => m.nomeMaregrafo === nomeMareGrafo);
 
-    if (maregrafo) {
+    if (mareGrafo) {
       setRegion((prevRegion) => ({
         ...prevRegion,
-        latitude: maregrafo.lat,
-        longitude: maregrafo.lon,
+        latitude: mareGrafo.lat,
+        longitude: mareGrafo.lon,
       }));
     }
   }
@@ -73,12 +73,12 @@ export default function Overview() {
 
   const mappedData = useMemo(() => {
     return (
-      maregrafosData?.map((maregrafo) => ({
-        key: maregrafo.siglaMaregrafo,
-        value: maregrafo.nomeMaregrafo,
+      mareGrafosData?.map((mareGrafo) => ({
+        key: mareGrafo.siglaMaregrafo,
+        value: mareGrafo.nomeMaregrafo,
       })) ?? []
     );
-  }, [maregrafosData]);
+  }, [mareGrafosData]);
 
   if (isLoading) {
     return (
@@ -100,7 +100,7 @@ export default function Overview() {
           data={mappedData}
           searchPlaceholder="Buscar..."
           placeholder="Selecione um porto"
-          setSelected={handleSelectMaregrafo}
+          setSelected={handleSelectMareGrafo}
         />
         <MapView
           style={styles.map}
@@ -112,16 +112,14 @@ export default function Overview() {
           }}
           region={region}
           onPress={handlePressMap}>
-          {maregrafosData?.map((maregrafo) => (
+          {mareGrafosData?.map((mareGrafo) => (
             <Marker
-              key={maregrafo.siglaMaregrafo}
+              key={mareGrafo.siglaMaregrafo}
               coordinate={{
-                latitude: maregrafo.lat,
-                longitude: maregrafo.lon,
+                latitude: mareGrafo.lat,
+                longitude: mareGrafo.lon,
               }}
               pinColor={colors.indigo[500]}
-              // title={maregrafo.nomeMaregrafo}
-              // description={maregrafo.local}
               onPress={handlePressMarker}
             />
           ))}
@@ -131,9 +129,9 @@ export default function Overview() {
               longitude: region.longitude,
             }}
             title="Você está aqui"
-            // description="A cool place"
           />
         </MapView>
+
         <BottomSheetComponent ref={BottomSheetRef} />
       </SafeAreaView>
     </>
@@ -144,13 +142,7 @@ export const styles = StyleSheet.create({
   container: {
     flex: 1,
     height: windowHeight,
-    gap: 12,
-
-    // alignItems: 'center',
-    // justifyContent: 'center',
-    // paddingBottom: insets.bottom,
-    // padding: 24,
-    // borderWidth: 2,
+    width: windowWidth,
   },
 
   map: {

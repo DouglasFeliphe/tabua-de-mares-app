@@ -1,6 +1,6 @@
 import api from './api.service';
 
-interface MaregrafosResponse {
+interface getMareGrafosResponse {
   siglaMaregrafo: string;
   nomeMaregrafo: string;
   local: string;
@@ -14,7 +14,7 @@ interface MaregrafosResponse {
   idPSMSL: number;
 }
 
-export async function getMaregrafos() {
-  const response = await api<MaregrafosResponse[]>(`/maregrafos`);
+export async function getMareGrafosService() {
+  const response = await api<getMareGrafosResponse[]>(`/maregrafos`);
   return response.data;
 }

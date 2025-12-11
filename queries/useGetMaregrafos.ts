@@ -1,12 +1,13 @@
+import { QUERY_KEYS } from './../consts/queryKeys';
 import { useQuery } from '@tanstack/react-query';
-import { getMaregrafos } from 'services/getMaregrafos.service';
+import { getMareGrafosService } from 'services/getMaregrafos.service';
 
-interface useGetTabuaMareQueryProps {}
+interface useGetMareGrafosQueryProps {}
 
-export const useGetMaregrafosQuery = ({}: useGetTabuaMareQueryProps) => {
+export const useGetMareGrafosQuery = ({}: useGetMareGrafosQueryProps) => {
   return useQuery({
-    queryKey: ['tabuaMareData'],
-    queryFn: () => getMaregrafos(),
+    queryKey: [QUERY_KEYS.maregrafosData],
+    queryFn: () => getMareGrafosService(),
     // enabled: false,
     staleTime: 1000 * 60 * 1440, // 24 hours
     refetchOnWindowFocus: false,
