@@ -17,12 +17,12 @@ export const useGetPrevisionQuery = ({
         momentoInicial,
         siglaMaregrafo,
       }),
-    // enabled: false,
+    enabled: !!siglaMaregrafo && !!momentoInicial && !!momentoFinal,
     staleTime: 1000 * 60 * 30, // 30 minutes
     refetchOnWindowFocus: false,
     refetchOnMount: false,
     refetchOnReconnect: false,
-    retry: false,
     retryOnMount: false,
+    retry: false,
   });
 };

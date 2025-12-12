@@ -16,7 +16,7 @@ export async function getPrevisionService({
   momentoInicial,
   momentoFinal,
 }: getPrevisionParams) {
-  const response = await api<getPrevisionResponse[]>(`/previsao`, {
+  const response = await api<getPrevisionResponse[]>(`/previsao/${siglaMaregrafo}`, {
     params: {
       momentoInicial,
       momentoFinal,

@@ -1,6 +1,6 @@
 import api from './api.service';
 
-interface getMareGrafosResponse {
+export interface getMareGrafosResponse {
   siglaMaregrafo: string;
   nomeMaregrafo: string;
   local: string;

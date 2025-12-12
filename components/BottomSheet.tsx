@@ -34,8 +34,8 @@ export const BottomSheetComponent = ({ ref, children }: BottomSheetComponentProp
         points={['50%', '75%']}
         onPressBackdrop={onPressBackdrop}
         onChangePoint={onChangePoint}>
-        <View className="flex-1 items-center p-12">
-          <Text>This is the content inside the Bottom Sheet.</Text>
+        <View className="flex-1 gap-4 px-8 py-12">
+          {/* <Text>This is the content inside the Bottom Sheet.</Text> */}
           {children}
         </View>
       </BottomSheet>
