@@ -1,13 +1,15 @@
 import React, { useRef } from 'react';
-import { View, Button, Text } from 'react-native';
+import { View, Button, Text, ActivityIndicator } from 'react-native';
 import BottomSheet, { BottomSheetRef } from '@ahmetaltai/react-native-bottom-sheet';
+import colors from 'tailwindcss/colors';
 
 interface BottomSheetComponentProps {
   ref?: React.RefObject<BottomSheetRef>;
   children?: React.ReactNode;
+  isLoading: boolean;
 }
 
-export const BottomSheetComponent = ({ ref, children }: BottomSheetComponentProps) => {
+export const BottomSheetComponent = ({ isLoading, ref, children }: BottomSheetComponentProps) => {
   //   const ExpandBottomSheet = () => {
   //     BottomSheetRef.current?.expand();
   //   };
@@ -35,8 +37,7 @@ export const BottomSheetComponent = ({ ref, children }: BottomSheetComponentProp
         onPressBackdrop={onPressBackdrop}
         onChangePoint={onChangePoint}>
         <View className="flex-1 gap-4 px-8 py-12">
-          {/* <Text>This is the content inside the Bottom Sheet.</Text> */}
-          {children}
+          {isLoading ? <ActivityIndicator size="large" color={colors.indigo[500]} /> : children}
         </View>
       </BottomSheet>
     </View>
