@@ -18,9 +18,13 @@ import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context'
 import { getMareGrafosResponse } from 'services/getMaregrafos.service';
 import colors from 'tailwindcss/colors';
 
+import { IconGif } from 'components/IconGif';
 import { formatDateWithTimeZone } from 'helpers/formatDate';
 import { formatDateForGraphLabel } from 'helpers/formatDateForGraphLabel';
 import Toast from 'react-native-toast-message';
+import { ExpoAnimatedIcons } from 'components/ExpoAnimatedIcons';
+import { TideDetails } from 'components/TideDetails';
+import { TideHeightStatusTypes, TideTrendStatusTypes } from 'interface/tideDetails.interface';
 
 const windowHeight = Dimensions.get('window').height;
 const windowWidth = Dimensions.get('window').width;
@@ -147,6 +151,7 @@ export default function Overview() {
   }
   // const tideNow = previsionData?.map((item) => item.previsao)[0].toFixed(1);
   const tidesNow = getTidesNow();
+
   const tideNow = tidesNow?.[0];
 
   console.log('tideNow :', tideNow);
@@ -155,8 +160,8 @@ export default function Overview() {
     item.previsao > Number(tideNow?.previsao) ? 1 : -1
   )[0];
 
-  const renderTideTrend = () => {
-    if (!tideTrend) return;
+  const renderTideTrend = (): TideTrendStatusTypes => {
+    if (!tideTrend) return 'Estável';
     console.log('tideTrend :', tideTrend);
 
     if (tideTrend > 0) {
@@ -168,24 +173,20 @@ export default function Overview() {
     return 'Estável';
   };
 
-  console.log('tideTrend :', tideTrend);
-
   const nextHighTide = tidesNow?.sort((a, b) => b.previsao - a.previsao)[0];
 
   const nextLowTide = tidesNow?.sort((a, b) => a.previsao - b.previsao)[0];
 
-  const renderTideHeightText = () => {
-    if (!nextLowTide) return;
+  const renderTideHeightText = (): TideHeightStatusTypes => {
+    if (!nextLowTide) return 'Normal';
 
     const tideHeight = nextLowTide?.previsao;
 
-    if (tideHeight < 0) {
-      return 'Baixa';
-    } else if (tideHeight > 1) {
-      return 'Alta';
-    } else {
-      return 'Normal';
-    }
+    if (tideHeight < 0) return 'Baixa';
+    if (tideHeight > 1) return 'Alta';
+    if (tideHeight > 0 && tideHeight < 1) return 'Normal';
+
+    return 'Normal';
   };
 
   if (isLoading) {
@@ -222,7 +223,7 @@ export default function Overview() {
                 latitude: mareGrafo.lat,
                 longitude: mareGrafo.lon,
               }}
-              pinColor={colors.indigo[500]}
+              pinColor={colors.blue[200]}
               onPress={() => handlePressMarker(mareGrafo)}
             />
           ))}
@@ -231,76 +232,25 @@ export default function Overview() {
               latitude: region.latitude,
               longitude: region.longitude,
             }}
-            title="Você está aqui"
-          />
+            title="Você está aqui">
+            {/* <ExpoAnimatedIcons /> */}
+          </Marker>
         </MapView>
 
-        <BottomSheetComponent ref={bottomSheetRef}>
-          <View>
-            <Text className="text-xl font-bold">
-              {selectedMareGrafo ? selectedMareGrafo.nomeMaregrafo : ''}
-            </Text>
-            <View className="w-fit flex-row items-center">
-              <Ionicons name="water" color={colors.blue[500]} size={18} />
-              <Text className="text-xl font-bold text-blue-500">
-                {selectedMareGrafo ? selectedMareGrafo.siglaUF + ' / Brasil' : ''}
-              </Text>
-            </View>
-          </View>
-
-          <View className="w-auto flex-row items-center justify-center gap-8 rounded-full border-transparent bg-white p-4 shadow-md">
-            <View className="border-r-2 border-r-slate-200 px-4">
-              <Text className="font-bold text-slate-500">Maré {renderTideHeightText()}</Text>
-              <View className="flex-row items-end">
-                <Text className="text-[24px] font-bold">{tideNow?.previsao.toFixed(1)}</Text>
-                <Text className="text-xl font-bold text-slate-500">m</Text>
-              </View>
-            </View>
-            <View className="h-full">
-              <Text className="font-bold text-slate-500">Tendencia</Text>
-              <View className="h-fit flex-row items-center justify-center gap-1 rounded-full bg-green-100 px-2 py-1">
-                <Ionicons name="trending-up" color={colors.green[400]} size={16} />
-                <Text className="font-bold text-green-400">{renderTideTrend()}</Text>
-              </View>
-            </View>
-          </View>
-
-          <View className="flex-row justify-between gap-2">
-            <View className="w-fit flex-row items-center gap-2 rounded-full border-2 border-blue-100 bg-blue-50 px-4 py-2">
-              <View className="rounded-full bg-blue-200 p-2">
-                <Feather name="arrow-up-right" color={colors.blue[500]} size={18} />
-              </View>
-              <View>
-                <Text className="text-sm font-bold text-slate-500">Próxima Alta</Text>
-                <View className="flex-row gap-1">
-                  {/* <Text className="font-extrabold">16:45</Text> */}
-                  <Text className="font-extrabold">
-                    {formatDateForGraphLabel(nextHighTide?.dtHrPrevisao ?? '')}
-                  </Text>
-                  <Text className="text-slate-400">{nextHighTide?.previsao.toFixed(1)}m</Text>
-                </View>
-              </View>
-            </View>
-
-            <View className="w-fit flex-row items-center gap-2 rounded-full border-2 border-slate-100 bg-slate-50 px-4 py-2">
-              <View className="rounded-full bg-slate-200 p-2">
-                <Feather name="arrow-down-right" color={colors.slate[500]} size={18} />
-              </View>
-              <View>
-                <Text className="text-sm font-bold text-slate-500">Próxima Baixa</Text>
-                <View className="flex-row gap-1">
-                  <Text className="font-extrabold">
-                    {formatDateForGraphLabel(nextLowTide?.dtHrPrevisao ?? '')}
-                  </Text>
-                  <Text className="text-slate-400">{nextLowTide?.previsao.toFixed(1)}m</Text>
-                </View>
-              </View>
-            </View>
-          </View>
+        <BottomSheetComponent ref={bottomSheetRef} isLoading={isPrevisionLoading}>
+          <TideDetails
+            locationName={selectedMareGrafo ? selectedMareGrafo.nomeMaregrafo : ''}
+            state={selectedMareGrafo?.siglaUF ?? ''}
+            tideHeightLabelNow={renderTideHeightText()}
+            tideTrend={renderTideTrend()}
+            tideHeightNow={tideNow?.previsao ?? 0}
+            nextHighTideHour={nextHighTide?.dtHrPrevisao ?? ''}
+            nextHighTideHeight={nextHighTide?.previsao ?? 0}
+            nextLowTideHour={nextLowTide?.dtHrPrevisao ?? ''}
+            nextLowTideHeight={nextLowTide?.previsao ?? 0}
+          />
 
           <TideChart data={mappedDataForGraph} />
-
-          <Button title="Dados da previsão" isLoading={isPrevisionLoading} />
         </BottomSheetComponent>
       </SafeAreaView>
     </>
