@@ -3,7 +3,7 @@ import { Text, View } from 'react-native';
 
 type ScreenContentProps = {
   title: string;
-  path: string;
+  path?: string;
   children?: React.ReactNode;
 };
 
