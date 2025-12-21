@@ -1,12 +1,11 @@
-import React, { JSX } from 'react';
+import React from 'react';
 import { View, Text } from 'react-native';
 import { Ionicons, Feather, MaterialIcons } from '@expo/vector-icons';
 import colors from 'tailwindcss/colors';
 import { TideHeightStatusTypes, TideTrendStatusTypes } from 'interface/tideDetails.interface';
 import { formatDateForGraphLabel } from 'helpers/formatDateForGraphLabel';
-import { DefaultColors } from 'tailwindcss/types/generated/colors';
-import { GlyphMap, Icon, IconProps } from '@expo/vector-icons/build/createIconSet';
 import { Divider } from './Divider';
+import { cn } from 'utils/lib';
 
 interface TideDetailsPros {
   locationName: string;
@@ -101,24 +100,59 @@ interface InfoItemProps {
 
 type Variants = 'default' | 'highlighted' | 'trivial';
 
-const getColorByVariant = (variant: Variants) => {
-  return DATA_COLORS[variant];
+const VARIANT_CLASSES: Record<
+  Variants,
+  { wrapper: string; iconBg: string; title: string; sub: string }
+> = {
+  default: {
+    wrapper:
+      'flex-row items-center gap-2 rounded-full border-2 border-blue-100 bg-blue-50 px-4 py-2',
+    iconBg: 'bg-blue-200',
+    title: 'text-sm font-bold text-blue-500',
+    sub: 'text-blue-400',
+  },
+  highlighted: {
+    wrapper:
+      'flex-row items-center gap-2 rounded-full border-2 border-blue-100 bg-blue-50 px-4 py-2',
+    iconBg: 'bg-blue-200',
+    title: 'text-sm font-bold text-blue-500',
+    sub: 'text-blue-400',
+  },
+  trivial: {
+    wrapper:
+      'flex-row items-center gap-2 rounded-full border-2 border-slate-100 bg-slate-50 px-4 py-2',
+    iconBg: 'bg-slate-200',
+    title: 'text-sm font-bold text-slate-500',
+    sub: 'text-slate-400',
+  },
 };
 
-const InfoItem = ({ title, hour, height, variant, iconName }: InfoItemProps) => {
-  const mainColor = getColorByVariant(variant);
+const renderIconColor = (variant: Variants) => {
+  switch (variant) {
+    case 'default':
+      return colors.blue[500];
+    case 'highlighted':
+      return colors.blue[500];
+    case 'trivial':
+      return colors.slate[500];
+    default:
+      return colors.blue[500];
+  }
+};
+
+const InfoItem: React.FC<InfoItemProps> = ({ title, hour, height, variant, iconName }) => {
+  const classes = VARIANT_CLASSES[variant];
 
   return (
-    <View
-      className={`flex-row items-center gap-2 rounded-full border-2 border-${mainColor}-100 bg-${mainColor}-50 px-4 py-2`}>
-      <View className={`bg-${mainColor}-200 rounded-full p-2`}>
-        <Feather name={iconName} color={colors.slate[500]} size={18} />
+    <View className={classes.wrapper}>
+      <View className={`${classes.iconBg} rounded-full p-2`}>
+        <Feather name={iconName} color={renderIconColor(variant)} size={18} />
       </View>
       <View>
-        <Text className={`text-sm font-bold text-${mainColor}-500`}>{title}</Text>
+        <Text className={classes.title}>{title}</Text>
         <View className="flex-row gap-1">
           <Text className="font-extrabold">{formatDateForGraphLabel(hour)}</Text>
-          <Text className={`text-${mainColor}-400`}>{height.toFixed(1)}m</Text>
+          <Text className={classes.sub}>{height.toFixed(1)}m</Text>
         </View>
       </View>
     </View>
@@ -129,32 +163,55 @@ interface InfoTendencyItemProps {
   tideTrend: TideTrendStatusTypes;
 }
 
-const InfoTendencyItem = ({ tideTrend }: InfoTendencyItemProps) => {
-  const renderIconName = (): keyof typeof MaterialIcons.glyphMap => {
-    if (tideTrend === 'Subindo') return 'trending-up';
-    if (tideTrend === 'Descendo') return 'trending-down';
-    return 'trending-flat';
+const InfoTendencyItem: React.FC<InfoTendencyItemProps> = ({ tideTrend }) => {
+  const trendIcon =
+    tideTrend === 'Subindo'
+      ? 'trending-up'
+      : tideTrend === 'Descendo'
+        ? 'trending-down'
+        : 'trending-flat';
+
+  const trendColor =
+    tideTrend === 'Subindo' ? 'green' : tideTrend === 'Descendo' ? 'slate' : 'blue';
+  console.log('trendColor :', trendColor);
+
+  const wrapperClass = cn('h-fit flex-row items-end gap-1 rounded-full px-2 py-1', {
+    'bg-green-400': tideTrend === 'Subindo',
+    'bg-slate-400': tideTrend === 'Descendo',
+    'bg-blue-400': tideTrend === 'Estável',
+  });
+
+  const renderIconColor = () => {
+    if (tideTrend === 'Subindo') {
+      return colors.green['400'];
+    }
+
+    if (tideTrend === 'Descendo') {
+      return 'white';
+    }
+
+    if (tideTrend === 'Estável') {
+      return colors.blue['400'];
+    }
   };
 
-  const renderColors = (): keyof DefaultColors => {
-    if (tideTrend === 'Subindo') return 'green';
-    if (tideTrend === 'Descendo') return 'slate';
-    return 'blue';
-  };
+  const textClass = cn(`font-bold`, {
+    'text-white': tideTrend === 'Descendo',
+    'text-slate-500': tideTrend === 'Subindo',
+    'text-blue-500': tideTrend === 'Estável',
+  });
 
   return (
-    <>
-      <View
-        className={`h-fit flex-row items-end gap-1 rounded-full bg-${renderColors()}-400 px-2 py-1`}>
-        <MaterialIcons name={renderIconName()} color={colors[renderColors()][400]} size={16} />
-        <Text className={`font-bold text-${renderColors()}-400`}>{tideTrend}</Text>
-      </View>
-    </>
+    <View className={wrapperClass}>
+      <MaterialIcons name={trendIcon as any} color={renderIconColor()} size={16} />
+      <Text className={textClass}>{tideTrend}</Text>
+    </View>
   );
 };
 
-const DATA_COLORS: Record<Variants, keyof DefaultColors> = {
+// kept for reference if needed elsewhere
+const DATA_COLORS = {
   default: 'blue',
   highlighted: 'purple',
   trivial: 'slate',
-};
+} as const;
