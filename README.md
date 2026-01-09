@@ -14,16 +14,16 @@
 
 ### Funcionalidades (macro) 🚀
 
-- Mapa com pontos monitorados
+- Mapa com pontos monitorados: 
   Interface simples para navegar por regiões costeiras e abrir dados específicos de cada local.
 
-- Visualização de marés 📈
+- Visualização de marés 📈: 
   Tela com gráficos básicos e informações essenciais: maré atual, anteriores e próximas.
 
-- Alertas básicos 🔔 (a implementar)
+- Alertas básicos 🔔 (a implementar): 
   Usuário define notificações para horários ou níveis de maré.
 
-- Cache inteligente ⚡
+- Cache inteligente ⚡: 
   React Query mantém os dados acessíveis offline, evita chamadas repetidas e atualiza silenciosamente quando possível.
 
 ### Estrutura do Projeto 🗂️
