@@ -2,6 +2,9 @@
 
 ## App React Native focado em visualização rápida de marés.
 
+<img width="401" height="874" alt="image" src="https://github.com/user-attachments/assets/c7e415da-b05e-4fd5-af65-529260dcf0c6" />
+
+
 ### Stack ⚙️
 
 - React Native
