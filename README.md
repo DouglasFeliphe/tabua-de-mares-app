@@ -1,6 +1,6 @@
 # TideTracker 🌊
 
-## App React Native focado em visualização rápida e confiável de marés.
+## App React Native focado em visualização rápida de marés.
 
 ### Stack ⚙️
 
@@ -20,7 +20,7 @@
 - Visualização de marés 📈
   Tela com gráficos básicos e informações essenciais: maré atual, anteriores e próximas.
 
-- Alertas básicos 🔔
+- Alertas básicos 🔔 (a implementar)
   Usuário define notificações para horários ou níveis de maré.
 
 - Cache inteligente ⚡
@@ -45,5 +45,5 @@ npm start
 
 ### Objetivo do MVP 🎯
 
-Entregar visualização rápida e útil das condições de maré de regiões do Brasil.
+Entregar visualização rápida das condições de maré de regiões do Brasil.
 A ideia é crescer para modelos mais complexos (maré + chuva + vento), mas isso ficará para fases futuras.
