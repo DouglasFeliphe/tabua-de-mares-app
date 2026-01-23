@@ -1,12 +1,8 @@
-import { useNavigation } from '@react-navigation/native';
-
 import { ActivityIndicator, Dimensions, StyleSheet, Text, View } from 'react-native';
 
 import { BottomSheetRef } from '@ahmetaltai/react-native-bottom-sheet';
-import { Feather, Ionicons } from '@expo/vector-icons';
 import { isAxiosError } from 'axios';
 import { BottomSheetComponent } from 'components/BottomSheet';
-import { Button } from 'components/Button';
 import { SelectDropdown } from 'components/SelectDropdown';
 import { TideChart } from 'components/TideChart';
 import { useLocation } from 'hooks/useLocation';
@@ -19,12 +15,11 @@ import { getMareGrafosResponse } from 'services/getMaregrafos.service';
 import colors from 'tailwindcss/colors';
 
 import { IconGif } from 'components/IconGif';
+import { TideDetails } from 'components/TideDetails';
 import { formatDateWithTimeZone } from 'helpers/formatDate';
 import { formatDateForGraphLabel } from 'helpers/formatDateForGraphLabel';
-import Toast from 'react-native-toast-message';
-import { ExpoAnimatedIcons } from 'components/ExpoAnimatedIcons';
-import { TideDetails } from 'components/TideDetails';
 import { TideHeightStatusTypes, TideTrendStatusTypes } from 'interface/tideDetails.interface';
+import Toast from 'react-native-toast-message'; 
 
 const windowHeight = Dimensions.get('window').height;
 const windowWidth = Dimensions.get('window').width;
@@ -39,7 +34,7 @@ const INITIAL_REGION = {
 const PREVISION_INTERVAL_IN_HOURS = 3; // prevision of hours from now
 
 export default function Overview() {
-  const navigation = useNavigation();
+  // const navigation = useNavigation();
 
   const insets = useSafeAreaInsets();
 
@@ -105,12 +100,6 @@ export default function Overview() {
     }
   }
 
-  // useEffect(() => {
-  //   if (isError) {
-  //     Alert.alert('Erro', 'Não foi possível carregar maré, tente mais tarde.');
-  //   }
-  // }, [isError]);
-
   useEffect(() => {
     if (isAxiosError(errorPrevision) && errorPrevision.response) {
       Toast.show({
@@ -120,13 +109,14 @@ export default function Overview() {
       });
     }
   }, [errorPrevision]);
+
   console.log('errorPrevision :', errorPrevision);
 
   const mappedData = useMemo(
     () =>
       mareGrafosData?.map((mareGrafo) => ({
-        key: mareGrafo.siglaMaregrafo,
-        value: mareGrafo.nomeMaregrafo,
+        key: mareGrafo?.siglaMaregrafo,
+        value: mareGrafo?.nomeMaregrafo,
       })) ?? [],
     [mareGrafosData]
   );
@@ -134,11 +124,17 @@ export default function Overview() {
   const mappedDataForGraph = useMemo(
     () =>
       previsionData?.map((item) => ({
-        value: item.previsao,
-        label: formatDateForGraphLabel(item.dtHrPrevisao),
+        value: item?.previsao,
+        label: formatDateForGraphLabel(item?.dtHrPrevisao),
       })) ?? [],
     [previsionData]
   );
+
+  const onlyFirstMiddleAndLast = [
+    mappedDataForGraph[0],
+    mappedDataForGraph[mappedDataForGraph.length / 2],
+    mappedDataForGraph[mappedDataForGraph.length - 1],
+  ];
 
   //create a function to get the tide now, filtering by hour and minutes now
   function getTidesNow() {
@@ -224,15 +220,20 @@ export default function Overview() {
                 longitude: mareGrafo.lon,
               }}
               pinColor={colors.blue[200]}
-              onPress={() => handlePressMarker(mareGrafo)}
-            />
+              onPress={() => handlePressMarker(mareGrafo)}>
+              <IconGif size={70} />
+            </Marker>
           ))}
           <Marker
             coordinate={{
               latitude: region.latitude,
               longitude: region.longitude,
             }}
-            title="Você está aqui">
+            title="Você está aqui"
+            style={{
+              height: 5,
+              width: 5,
+            }}>
             {/* <ExpoAnimatedIcons /> */}
           </Marker>
         </MapView>
@@ -250,7 +251,7 @@ export default function Overview() {
             nextLowTideHeight={nextLowTide?.previsao ?? 0}
           />
 
-          <TideChart data={mappedDataForGraph} />
+          <TideChart data={onlyFirstMiddleAndLast} />
         </BottomSheetComponent>
       </SafeAreaView>
     </>
