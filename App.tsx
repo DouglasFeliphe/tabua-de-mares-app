@@ -11,20 +11,37 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 import Toast from 'react-native-toast-message';
 import Navigation from './navigation';
 
-const queryClient = new QueryClient();
+import { createAsyncStoragePersister } from '@tanstack/query-async-storage-persister';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { PersistQueryClientProvider } from '@tanstack/react-query-persist-client';
+
+const queryClient = new QueryClient({
+  defaultOptions: {
+    //  cacheTime: 1000 * 60 * 60 * 24  // 24 hours
+  },
+});
+
+const asyncStoragePersister = createAsyncStoragePersister({
+  storage: AsyncStorage,
+});
 
 export default function App() {
   const colorScheme = useColorScheme();
+
   const theme = useMemo(() => (colorScheme === 'dark' ? DarkTheme : DefaultTheme), [colorScheme]);
 
   return (
     <>
-      <QueryClientProvider client={queryClient}>
+      <PersistQueryClientProvider
+        client={queryClient}
+        persistOptions={{
+          persister: asyncStoragePersister,
+        }}>
         <SafeAreaProvider>
-          <Navigation theme={theme} />;
+          <Navigation theme={theme} />
           <Toast />
         </SafeAreaProvider>
-      </QueryClientProvider>
+      </PersistQueryClientProvider>
     </>
   );
 }
