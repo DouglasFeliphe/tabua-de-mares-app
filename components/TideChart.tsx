@@ -1,4 +1,4 @@
-import { Ionicons } from '@expo/vector-icons';
+import { Ionicons } from '@expo/vector-icons'; 
 import React from 'react';
 import { Dimensions, Text, View } from 'react-native';
 import { LineChart } from 'react-native-gifted-charts';
@@ -26,13 +26,17 @@ export function TideChart({ data }: TideChartProps) {
 
   return (
     <View
-      style={{
-        // flex: 1,
-        // width: '100%',
-        // justifyContent: 'center',
-        paddingVertical: 20,
-        // borderWidth: 2,
-      }}>
+      className="align-center h-fit w-full justify-center overflow-hidden rounded-3xl border border-gray-200"
+      style={
+        {
+          // flex: 1,
+          // width: '100%',
+          // justifyContent: 'center',
+          // paddingVertical: 20,
+          // borderWidth: 2,
+        }
+      }>
+      <Text className="m-4 m-8 font-bold text-slate-400">Previsão 3H</Text>
       <LineChart
         curved
         data={data}
@@ -64,7 +68,7 @@ export function TideChart({ data }: TideChartProps) {
         // Remover círculos automáticos
         hideDataPoints
         // Customizar só o marcador destacado
-        customDataPoint={(point) =>
+        customDataPoint={(point: { dataPointRadius: number }) =>
           point.dataPointRadius ? (
             <View
               style={{
